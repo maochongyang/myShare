@@ -1,0 +1,138 @@
+<html>
+<head>
+<head>
+<title>点位消失测试页面!</title>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<style>
+body{
+	margin: 0;
+}
+</style>
+</head>
+<script src='./lib/jquery-3.2.1.min.js'></script>
+<script>
+var ip = "10.221.102.120";
+var maxAge = 3000;
+var tag = "0";
+var r = "";
+var t = 0;
+function clockPosition()
+{	
+	$.get("http://"+ip+":8080/qpe/getTagPosition?version=2&maxAge="+maxAge+"&tag="+tag, function(result){
+		//console.log("hello:", result.tags.length);
+		
+		if(result.tags.length == 0){		
+			t= t+ 1;
+			console.log("no:", t);
+			if(t != 0 && c < t){
+				c = t;
+				timedCount(c);
+			}
+		}else{
+			t = 0;
+		}
+	});
+}
+
+function clockTagInfo()
+{	
+	$.get("http://"+ip+":8085/getTagInfo?version=2&maxAge="+maxAge+"&tag="+tag, function(result){
+		//console.log("hello:", result.tags.length);
+		
+		if(result.tags.length == 0){		
+			t= t+ 1;
+			console.log("no:", t);
+			if(t != 0 && c < t){
+				c = t;
+				timedCount(c);
+			}
+		}else{
+			t = 0;
+		}
+	});
+}
+
+var task;
+function begin()
+{
+	countNo = 0;
+	total = 0;
+	window.clearInterval(task);
+	tag = $("#tagNo").val();
+	maxAge = $("#maxAge").val();
+	if(tag.length == 0 || maxAge.length == 0){
+		alert("请填入必填项！！");
+		return;
+	}
+	task = setInterval("clockPosition()",1000);
+	//timedCount();
+}
+function stop()
+{
+	window.clearInterval(task);
+	clearTimeout(t);
+}
+function end()
+{
+	stopCount();
+	window.clearInterval(task);
+}
+
+var c=0
+
+function timedCount(t)
+{
+	//c=c+1;
+	$("#seconds").html(formatSeconds(t));
+	//t=setTimeout("timedCount()",1000);	
+}
+
+function stopCount()
+{
+	c=0;
+	$("#seconds").html(formatSeconds(c));
+	clearTimeout(t);
+}
+
+function formatSeconds(value) { 
+	var theTime = parseInt(value);// 秒 
+	var theTime1 = 0;// 分 
+	var theTime2 = 0;// 小时 
+	// alert(theTime); 
+	if(theTime > 60) { 
+	theTime1 = parseInt(theTime/60); 
+	theTime = parseInt(theTime%60); 
+	// alert(theTime1+"-"+theTime); 
+	if(theTime1 > 60) { 
+	theTime2 = parseInt(theTime1/60); 
+	theTime1 = parseInt(theTime1%60); 
+	} 
+	} 
+	var result = ""+parseInt(theTime)+"秒"; 
+	if(theTime1 > 0) { 
+	result = ""+parseInt(theTime1)+"分"+result; 
+	} 
+	if(theTime2 > 0) { 
+	result = ""+parseInt(theTime2)+"小时"+result; 
+	} 
+	return result; 
+}
+</script>
+</head>
+<body >
+	<label>tagId：</label>
+	<input id="tagNo" ></input>
+	<br>
+	<label>maxAge：</label>
+	<input id="maxAge" value="3000"></input>
+	<br>
+	<br>
+	<button onclick="begin()">Begin</button>
+	<button style="margin-left: 10" onclick="stop()">Stop</button>
+	<button style="margin-left: 10" onclick="end()">End</button>
+	<br>
+	<br>
+	<br>
+	disappearMaxTime：<label id="seconds"></label>
+</body>
+</html>
