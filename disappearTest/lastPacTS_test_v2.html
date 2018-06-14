@@ -1,0 +1,86 @@
+<html>
+<head>
+<head>
+<title>点位消失测试页面!</title>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<style>
+body{
+	margin: 0;
+}
+</style>
+</head>
+<script src='./lib/jquery-3.2.1.min.js'></script>
+<script>
+var ip = "127.0.0.1";
+var maxAge = 300000;
+var tag = "0";
+var lastTime = 0;
+var vartime = 0;
+let r = 0;
+let s = "";
+
+let time = 0;
+function clockInfo()
+{	
+
+	time = time + 1;
+	if(time <= 3600){
+		$.get("http://"+ip+":8085/getTagInfo?version=2&tag="+tag, function(result){
+			//console.log("hello:", result.tags.length);
+			if(result.code == 0){
+				var tags = result.tags;
+				if(tags.length != 0){
+					let tag = tags[0];
+					var timestamp = new Date().getTime();
+					vartime = timestamp - tag.lastPacketTS;
+					console.log(vartime);
+					s = s + vartime + "ms "
+					$("#time").html(s);
+				}
+			}
+		});
+	}
+}
+
+var task;
+function begin()
+{
+	window.clearInterval(task);
+	tag = $("#tagNo").val();
+	maxAge = $("#maxAge").val();
+	if(tag.length == 0 || maxAge.length == 0){
+		alert("请填入必填项！！");
+		return;
+	}
+	task = setInterval("clockInfo()",1000);
+}
+function stop()
+{
+	window.clearInterval(task);
+}
+function end()
+{
+	r =0;
+	$("#time").html(r+" ms");
+	window.clearInterval(task);
+}
+
+</script>
+</head>
+<body >
+	<label>tagId：</label>
+	<input id="tagNo" ></input>
+	<br>
+	<label>maxAge：</label>
+	<input id="maxAge" value="300000"></input>
+	<br>
+	<br>
+	<button onclick="begin()">Begin</button>
+	<button style="margin-left: 10" onclick="stop()">Stop</button>
+	<button style="margin-left: 10" onclick="end()">End</button>
+	<br>
+	<br>
+	<br>
+	lastPacTS_disappearMaxTime：<label id="time"></label>
+</body>
+</html>
